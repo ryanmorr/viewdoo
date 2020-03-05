@@ -14,7 +14,7 @@ function parseHTML(html) {
 }
 
 export default function viewdoo(source) {
-    let script, html, render;
+    let script, html;
     html = source.replace(SCRIPT_RE, (all, js) => {
         script = js.trim();
         return '';
@@ -22,7 +22,7 @@ export default function viewdoo(source) {
 
     script = `
         ${script}
-        __render__ = function() {
+        _render = function() {
             let _strings = [], _sequence = [], _values = [];
             _sequence.push('${
                 html.trim().replace(NEW_LINES_RE, '\\n').replace(TEMPLATE_RE, (all, code) => {
@@ -57,13 +57,38 @@ export default function viewdoo(source) {
     `;
 
     return (parent, props) => {
-        props.__render__ = null;
-        const exec = voodoo(script);
+        let element, render;
+        props._render = null;
+
+        function update() {
+            const [strings, values] = render();
+            const html = strings.reduce((acc, str, i) => acc + (values[i - 1]) + str);
+            const frag = parseHTML(html);
+            const nextElement = frag.firstChild;
+            if (element) {
+                element.replaceWith(frag);
+            } else {
+                parent.appendChild(frag);
+            }
+            element = nextElement;
+        }
+
+        const exec = voodoo(script, {
+            set() {
+                if (render) {
+                    update();
+                }
+            },
+            delete() {
+                if (render) {
+                    update();
+                }
+            }
+        });
+        
         const state = exec(props);
-        render = state.__render__;
-        const [strings, values] = render();
-        const html = strings.reduce((acc, str, i) => acc + (values[i - 1]) + str);
-        parent.appendChild(parseHTML(html));
+        render = state._render;
+        update();
         return state;
     };
 }

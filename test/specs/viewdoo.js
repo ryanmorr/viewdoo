@@ -37,13 +37,39 @@ describe('viewdoo', () => {
             bar: 2
         });
 
-        expect(state).to.have.property('foo', 1);
-        expect(state).to.have.property('bar', 2);
-
         expectHTML(root, `
             <div class="container">
                 <p>1 2 3</p>
             </div>
         `);
+
+        expect(state).to.have.property('foo', 1);
+        expect(state).to.have.property('bar', 2);
+    });
+
+    it('should automatically update a view when the state changes', () => {
+        const view = viewdoo(`
+            <script>
+                increment = () => count++;
+            </script>
+
+            <div>{{count}}</div>
+        `);
+
+        const state = view(root, {
+            count: 0,
+            increment: null
+        });
+
+        expectHTML(root, '<div>0</div>');
+        expect(state).to.have.property('count', 0);
+
+        state.increment();
+        expectHTML(root, '<div>1</div>');
+        expect(state).to.have.property('count', 1);
+
+        state.increment();
+        expectHTML(root, '<div>2</div>');
+        expect(state).to.have.property('count', 2);
     });
 });
