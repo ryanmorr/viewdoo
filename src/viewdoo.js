@@ -1,11 +1,18 @@
+import csscope from '@ryanmorr/csscope';
 import voodoo from 'voodoo';
 
+const STYLE_RE = /<style>([\s\S]*?)<\/style>/;
 const SCRIPT_RE = /<script>([\s\S]*?)<\/script>/;
 const NEW_LINES_RE = /(\r\n|\r|\n)/g;
 const TEMPLATE_RE = /{{\s*(.+?)\s*}}/g;
 const EACH_RE = /^each (.*) as (.*)$/;
 const IF_RE = /^if (.*)$/;
 const ELSE_IF_RE = /^else if (.*)$/;
+const CSS_ATTR_PREFIX = 'data-css-';
+
+function uniqueID() {
+    return Math.random().toString(36).substr(2, 9);
+}
 
 function parseHTML(html) {
     const template = document.createElement('template');
@@ -13,13 +20,33 @@ function parseHTML(html) {
     return document.importNode(template.content, true);
 }
 
+function createStyleSheet(css, attr) {
+    const style = document.createElement('style');
+    style.setAttribute(attr, '');
+    style.innerHTML = csscope(attr, css);
+    document.head.appendChild(style);
+}
+
+function addStyleAttribute(element, attr) {
+    Array.from(element.children).forEach((child) => {
+        child.setAttribute(attr, '');
+        addStyleAttribute(child, attr);
+    });
+}
+
 export default function viewdoo(source) {
-    let script, html;
-    html = source.replace(SCRIPT_RE, (all, js) => {
+    let script;
+    let style;
+    let cssAttr;
+
+    const html = source.replace(STYLE_RE, (all, css) => {
+        style = css.trim();
+        return '';
+    }).replace(SCRIPT_RE, (all, js) => {
         script = js.trim();
         return '';
     }).trim();
-
+    
     script = `
         ${script}
         _render = function() {
@@ -61,9 +88,16 @@ export default function viewdoo(source) {
         props._render = null;
 
         function update() {
+            if (style && !cssAttr) {
+                cssAttr = CSS_ATTR_PREFIX + uniqueID();
+                createStyleSheet(style, cssAttr);
+            }
             const [strings, values] = render();
             const html = strings.reduce((acc, str, i) => acc + (values[i - 1]) + str);
             const frag = parseHTML(html);
+            if (cssAttr) {
+                addStyleAttribute(frag, cssAttr);
+            }
             const nextElement = frag.firstChild;
             if (element) {
                 element.replaceWith(frag);

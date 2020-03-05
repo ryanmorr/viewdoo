@@ -6,7 +6,6 @@ describe('viewdoo', () => {
 
     afterEach(() => {
         root.innerHTML = '';
-        root._prevVNode = null;
     });
 
     after(() => {
@@ -144,5 +143,33 @@ describe('viewdoo', () => {
         expect(state2).to.have.property('count', 8);
         expectHTML(element3, '<div>21</div>');
         expect(state3).to.have.property('count', 21);
+    });
+
+    it('should support scoped styles for views', () => {
+        const view = viewdoo(`
+            <style>
+                div {
+                    width: 213px;
+                }
+            </style>
+
+            <script>
+                increment = () => count++;
+            </script>
+    
+            <div>{{count}}</div>
+        `);
+
+        const state = view(root, {count: 0, increment: null});
+        let div = root.firstChild;
+        expectHTML(div, '0');
+        expect(window.getComputedStyle(div).getPropertyValue('width')).to.equal('213px');
+        expect(window.getComputedStyle(root).getPropertyValue('width')).to.not.equal('213px');
+
+        state.increment();
+        div = root.firstChild;
+        expectHTML(div, '1');
+        expect(window.getComputedStyle(div).getPropertyValue('width')).to.equal('213px');
+        expect(window.getComputedStyle(root).getPropertyValue('width')).to.not.equal('213px');
     });
 });
