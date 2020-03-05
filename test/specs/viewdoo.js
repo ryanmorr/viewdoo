@@ -96,4 +96,53 @@ describe('viewdoo', () => {
             done();
         }, 200);
     });
+
+    it('should support multiple instances of the same view', () => {
+        const view = viewdoo(`
+            <script>
+                increment = () => count++;
+            </script>
+    
+            <div>{{count}}</div>
+        `);
+    
+        const element1 = document.createElement('div');
+        const state1 = view(element1, {count: 3, increment: null});
+        expectHTML(element1, '<div>3</div>');
+        expect(state1).to.have.property('count', 3);
+    
+        const element2 = document.createElement('div');
+        const state2 = view(element2, {count: 7, increment: null});
+        expectHTML(element2, '<div>7</div>');
+        expect(state2).to.have.property('count', 7);
+
+        const element3 = document.createElement('div');
+        const state3 = view(element3, {count: 20, increment: null});
+        expectHTML(element3, '<div>20</div>');
+        expect(state3).to.have.property('count', 20);
+
+        state1.increment();
+        expectHTML(element1, '<div>4</div>');
+        expect(state1).to.have.property('count', 4);
+        expectHTML(element2, '<div>7</div>');
+        expect(state2).to.have.property('count', 7);
+        expectHTML(element3, '<div>20</div>');
+        expect(state3).to.have.property('count', 20);
+
+        state2.increment();
+        expectHTML(element1, '<div>4</div>');
+        expect(state1).to.have.property('count', 4);
+        expectHTML(element2, '<div>8</div>');
+        expect(state2).to.have.property('count', 8);
+        expectHTML(element3, '<div>20</div>');
+        expect(state3).to.have.property('count', 20);
+
+        state3.increment();
+        expectHTML(element1, '<div>4</div>');
+        expect(state1).to.have.property('count', 4);
+        expectHTML(element2, '<div>8</div>');
+        expect(state2).to.have.property('count', 8);
+        expectHTML(element3, '<div>21</div>');
+        expect(state3).to.have.property('count', 21);
+    });
 });
