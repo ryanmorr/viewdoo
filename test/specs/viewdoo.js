@@ -32,10 +32,13 @@ describe('viewdoo', () => {
             </div>
         `);
 
-        view(root, {
+        const state = view(root, {
             foo: 1,
             bar: 2
         });
+
+        expect(state).to.have.property('foo', 1);
+        expect(state).to.have.property('bar', 2);
 
         expectHTML(root, `
             <div class="container">

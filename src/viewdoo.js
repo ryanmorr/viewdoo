@@ -59,10 +59,11 @@ export default function viewdoo(source) {
     return (parent, props) => {
         props.__render__ = null;
         const exec = voodoo(script);
-        const data = exec(props);
-        render = data.__render__;
+        const state = exec(props);
+        render = state.__render__;
         const [strings, values] = render();
         const html = strings.reduce((acc, str, i) => acc + (values[i - 1]) + str);
         parent.appendChild(parseHTML(html));
+        return state;
     };
 }
