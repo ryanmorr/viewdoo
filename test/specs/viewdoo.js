@@ -72,4 +72,28 @@ describe('viewdoo', () => {
         expectHTML(root, '<div>2</div>');
         expect(state).to.have.property('count', 2);
     });
+
+    it('should support async updates', (done) => {
+        const view = viewdoo(`
+            <script>
+                setTimeout(() => count++, 100);
+            </script>
+    
+            <div>{{count}}</div>
+        `);
+    
+        const state = view(root, {
+            count: 0,
+            increment: null
+        });
+    
+        expectHTML(root, '<div>0</div>');
+        expect(state).to.have.property('count', 0);
+    
+        setTimeout(() => {
+            expectHTML(root, '<div>1</div>');
+            expect(state).to.have.property('count', 1);
+            done();
+        }, 200);
+    });
 });
