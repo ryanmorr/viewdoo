@@ -40,7 +40,6 @@
     "sinon": "^7.3.1"
   },
   "dependencies": {
-    "@ryanmorr/csscope": "^0.1.0",
-    "voodoo": "file:../voodoo"
+    "@ryanmorr/csscope": "^0.1.0"
   }
 }
