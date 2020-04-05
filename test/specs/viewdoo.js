@@ -15,6 +15,16 @@ describe('html', () => {
         expect(compactHTML(element.innerHTML)).to.equal(compactHTML(html));
     }
 
+    function getCSSAttr(element) {
+        const attrs = element.attributes;
+        for(let i = 0; i < attrs.length; i++) {
+            if (attrs[i].name.startsWith('viewdoo')) {
+                return attrs[i].name;
+            }
+        }
+        return null;
+    }
+
     beforeEach(() => {
         neutralDOM.innerHTML = `
             <div class="foo">
@@ -301,6 +311,39 @@ describe('html', () => {
         expect(window.getComputedStyle(neutralDOM.querySelector('div')).getPropertyValue('padding')).to.equal('0px');
         expect(window.getComputedStyle(neutralDOM.querySelector('span')).getPropertyValue('padding')).to.equal('0px');
         expect(window.getComputedStyle(neutralDOM.querySelector('em')).getPropertyValue('padding')).to.equal('0px');
+    });
+
+    it('should create one stylesheet per view', () => {
+        const view = viewdoo(`
+            <style>
+                div {
+                    padding: 5px;
+                }
+            </style>
+    
+            <div></div>
+        `);
+
+        const styleCount = document.querySelectorAll('style').length;
+
+        const element1 = document.createElement('div');
+        view(element1);
+
+        const element2 = document.createElement('div');
+        view(element2);
+
+        const id1 = getCSSAttr(element1.querySelector('div'));
+        const id2 = getCSSAttr(element2.querySelector('div'));
+        expect(id1).to.not.equal(null);
+        expect(id2).to.not.equal(null);
+        expect(id1).to.equal(id2);
+
+        const styles = document.querySelectorAll('style');
+        expect(styles.length).to.equal(styleCount + 1);
+        const lastStyle = styles[styles.length - 1];
+        const styleID = getCSSAttr(lastStyle);
+        expect(styleID).to.equal(id1);
+        expect(styleID).to.equal(id2);
     });
 
     it('should render a view with script variables', () => {
