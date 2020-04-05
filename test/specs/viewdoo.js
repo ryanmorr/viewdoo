@@ -51,7 +51,16 @@ describe('html', () => {
 
         expect(view).to.be.a('function');
 
-        view(root);
+        const returnValue = view();
+
+        expect(returnValue).to.be.an('array');
+
+        const [element, state] = returnValue;
+        expect(element.nodeType).to.equal(11);
+        expect(state).to.be.a('object');
+        expect(state).to.deep.equal({});
+
+        root.appendChild(element);
 
         expectHTML(root, `
             <div class="foo"></div>
@@ -65,7 +74,9 @@ describe('html', () => {
             <section></section>
         `);
 
-        view(root);
+        const [element] = view();
+
+        root.appendChild(element);
 
         expectHTML(root, `
             <div></div>
@@ -79,10 +90,12 @@ describe('html', () => {
             <div class="{{foo}}">{{bar}}</div>
         `);
 
-        view(root, {
+        const [element] = view({
             foo: 'abc',
             bar: 123
         });
+
+        root.appendChild(element);
 
         expectHTML(root, `
             <div class="abc">123</div>
@@ -94,10 +107,12 @@ describe('html', () => {
             <div class="{{foo}}">{{bar}}</div>
         `);
 
-        const state = view(root, {
+        const [element, state] = view({
             foo: 'abc',
             bar: 123
         });
+
+        root.appendChild(element);
 
         expectHTML(root, `
             <div class="abc">123</div>
@@ -123,11 +138,13 @@ describe('html', () => {
             <section>{{baz}}</section>
         `);
 
-        const state = view(root, {
+        const [element] = view({
             foo: 5,
             bar: 15,
             baz: 30
         });
+
+        root.appendChild(element);
 
         expectHTML(root, `
             <div>5</div>
@@ -141,10 +158,12 @@ describe('html', () => {
             <div>{{foo + bar}}</div>
         `);
 
-        const state = view(root, {
+        const [element, state] = view({
             foo: 10,
             bar: 20
         });
+
+        root.appendChild(element);
 
         expectHTML(root, `
             <div>30</div>
@@ -172,9 +191,11 @@ describe('html', () => {
             </ul>
         `);
 
-        const state = view(root, {
+        const [element, state] =  view({
             items: ['foo', 'bar', 'baz', 'qux']
         });
+
+        root.appendChild(element);
 
         expectHTML(root, `
             <ul>
@@ -209,9 +230,11 @@ describe('html', () => {
             {{/if}}
         `);
 
-        const state = view(root, {
+        const [element, state] = view({
             foo: 1
         });
+
+        root.appendChild(element);
 
         expectHTML(root, `
             <div>a</div>
@@ -253,7 +276,9 @@ describe('html', () => {
             </div>
         `);
 
-        view(root);
+        const [element] = view();
+
+        root.appendChild(element);
 
         expect(window.getComputedStyle(root.querySelector('div')).getPropertyValue('padding')).to.equal('3px');
         expect(window.getComputedStyle(root.querySelector('span')).getPropertyValue('padding')).to.equal('7px');
@@ -287,9 +312,11 @@ describe('html', () => {
             </div>
         `);
 
-        const state = view(root, {
+        const [element, state] = view({
             count: 0
         });
+
+        root.appendChild(element);
 
         let viewEm = root.querySelector('em');
         expectHTML(viewEm, '0');
@@ -326,14 +353,16 @@ describe('html', () => {
 
         const styleCount = document.querySelectorAll('style').length;
 
-        const element1 = document.createElement('div');
-        view(element1);
+        const root1 = document.createElement('div');
+        const [element1] = view();
+        root1.appendChild(element1);
 
-        const element2 = document.createElement('div');
-        view(element2);
+        const root2 = document.createElement('div');
+        const [element2] = view();
+        root2.appendChild(element2);
 
-        const id1 = getCSSAttr(element1.querySelector('div'));
-        const id2 = getCSSAttr(element2.querySelector('div'));
+        const id1 = getCSSAttr(root1.querySelector('div'));
+        const id2 = getCSSAttr(root2.querySelector('div'));
         expect(id1).to.not.equal(null);
         expect(id2).to.not.equal(null);
         expect(id1).to.equal(id2);
@@ -357,10 +386,12 @@ describe('html', () => {
             </div>
         `);
 
-        const state = view(root, {
+        const [element, state] = view({
             foo: 1,
             bar: 2
         });
+
+        root.appendChild(element);
 
         expectHTML(root, `
             <div class="container">
@@ -382,10 +413,12 @@ describe('html', () => {
             <div>{{count}}</div>
         `);
 
-        const state = view(root, {
+        const [element, state] = view({
             count: 0,
             increment: null
         });
+
+        root.appendChild(element);
 
         expectHTML(root, '<div>0</div>');
         expect(state).to.have.property('count', 0);
@@ -408,10 +441,12 @@ describe('html', () => {
             <div>{{count}}</div>
         `);
     
-        const state = view(root, {
+        const [element, state] = view({
             count: 0,
             increment: null
         });
+
+        root.appendChild(element);
     
         expectHTML(root, '<div>0</div>');
         expect(state).to.have.property('count', 0);
@@ -438,71 +473,74 @@ describe('html', () => {
             <div>{{count}}</div>
         `);
     
-        const element1 = document.createElement('div');
-        document.body.appendChild(element1);
-        const state1 = view(element1, {
+        const root1 = document.createElement('div');
+        document.body.appendChild(root1);
+        const [element1, state1] = view({
             count: 3,
             increment: null
         });
+        root1.appendChild(element1);
         expect(state1).to.have.property('count', 3);
-        let view1Div = element1.querySelector('div');
+        let view1Div = root1.querySelector('div');
         expectHTML(view1Div, '3');
         expect(window.getComputedStyle(view1Div).getPropertyValue('padding')).to.equal('4px');
     
-        const element2 = document.createElement('div');
-        document.body.appendChild(element2);
-        const state2 = view(element2, {
+        const root2 = document.createElement('div');
+        document.body.appendChild(root2);
+        const [element2, state2] = view({
             count: 7,
             increment: null
         });
+        root2.appendChild(element2);
         expect(state2).to.have.property('count', 7);
-        let view2Div = element2.querySelector('div');
+        let view2Div = root2.querySelector('div');
         expectHTML(view2Div, '7');
         expect(window.getComputedStyle(view2Div).getPropertyValue('padding')).to.equal('4px');
 
-        const element3 = document.createElement('div');
-        document.body.appendChild(element3);
-        const state3 = view(element3, {
+        const root3 = document.createElement('div');
+        document.body.appendChild(root3);
+        const [element3, state3] = view({
             count: 20,
             increment: null
         });
+        root3.appendChild(element3);
         expect(state3).to.have.property('count', 20);
-        let view3Div = element3.querySelector('div');
+        let view3Div = root3.querySelector('div');
         expectHTML(view3Div, '20');
         expect(window.getComputedStyle(view3Div).getPropertyValue('padding')).to.equal('4px');
 
         state1.increment();
         expect(state1).to.have.property('count', 4);
-        view1Div = element1.querySelector('div');
+        view1Div = root1.querySelector('div');
         expectHTML(view1Div, '4');
         expect(window.getComputedStyle(view1Div).getPropertyValue('padding')).to.equal('4px');
         expect(state2).to.have.property('count', 7);
-        expectHTML(element2.querySelector('div'), '7');
+        expectHTML(root2.querySelector('div'), '7');
         expect(state3).to.have.property('count', 20);
-        expectHTML(element3.querySelector('div'), '20');
+        expectHTML(root3.querySelector('div'), '20');
 
         state2.increment();
         expect(state1).to.have.property('count', 4);
-        expectHTML(element1.querySelector('div'), '4');
+        expectHTML(root1.querySelector('div'), '4');
         expect(state2).to.have.property('count', 8);
-        view2Div = element2.querySelector('div');
+        view2Div = root2.querySelector('div');
         expectHTML(view2Div, '8');
         expect(window.getComputedStyle(view2Div).getPropertyValue('padding')).to.equal('4px');
         expect(state3).to.have.property('count', 20);
-        expectHTML(element3.querySelector('div'), '20');
+        expectHTML(root3.querySelector('div'), '20');
 
         state3.increment();
         expect(state1).to.have.property('count', 4);
-        expectHTML(element1.querySelector('div'), '4');
+        expectHTML(root1.querySelector('div'), '4');
         expect(state2).to.have.property('count', 8);
-        expectHTML(element2.querySelector('div'), '8');
+        expectHTML(root2.querySelector('div'), '8');
         expect(state3).to.have.property('count', 21);
-        view3Div = element3.querySelector('div');
+        view3Div = root3.querySelector('div');
         expectHTML(view3Div, '21');
         expect(window.getComputedStyle(view3Div).getPropertyValue('padding')).to.equal('4px');
 
-        document.body.removeChild(element1);
-        document.body.removeChild(element2);
-        document.body.removeChild(element3);
+        document.body.removeChild(root1);
+        document.body.removeChild(root2);
+        document.body.removeChild(root3);
     });
 });

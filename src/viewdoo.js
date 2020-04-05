@@ -80,8 +80,8 @@ function parseView(source) {
 export default function viewdoo(source) {
     let cssAttr;
     const [css, tpl] = parseView(source);
-    return (parent, props = {}) => {
-        let element;
+    return (props = {}) => {
+        let elements, marker;
         const update = () => {
             if (css && !cssAttr) {
                 cssAttr = CSS_ATTR_PREFIX + uniqueID();
@@ -93,12 +93,19 @@ export default function viewdoo(source) {
             if (cssAttr) {
                 addStyleAttribute(frag, cssAttr);
             }
-            const nextElement = Array.from(frag.childNodes);
-            if (element) {
-                element.forEach((node) => parent.removeChild(node));
+            const nextElements = Array.from(frag.childNodes);
+            if (!marker) {
+                marker = document.createTextNode('');
+                frag.appendChild(marker);
             }
-            parent.appendChild(frag);
-            element = nextElement;
+            if (elements) {
+                elements.forEach((node) => node.remove());
+                marker.parentNode.insertBefore(frag, marker);
+                elements = nextElements;
+            } else {
+                elements = nextElements;
+                return frag;
+            }
         };
         const state = new Proxy(props, {
             set(obj, prop, nextVal) {
@@ -111,7 +118,6 @@ export default function viewdoo(source) {
             }
         });
         const render = tpl.call(state);
-        update();
-        return state;
+        return [update(), state];
     };
 }
