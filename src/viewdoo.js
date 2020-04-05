@@ -93,12 +93,11 @@ export default function viewdoo(source) {
             if (cssAttr) {
                 addStyleAttribute(frag, cssAttr);
             }
-            const nextElement = frag.firstChild;
+            const nextElement = Array.from(frag.childNodes);
             if (element) {
-                element.replaceWith(frag);
-            } else {
-                parent.appendChild(frag);
+                element.forEach((node) => parent.removeChild(node));
             }
+            parent.appendChild(frag);
             element = nextElement;
         };
         const state = new Proxy(props, {
