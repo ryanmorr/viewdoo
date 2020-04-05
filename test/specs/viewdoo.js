@@ -341,6 +341,8 @@ describe('html', () => {
     });
 
     it('should create one stylesheet per view', () => {
+        const styleCount = document.querySelectorAll('style').length;
+        
         const view = viewdoo(`
             <style>
                 div {
@@ -350,8 +352,6 @@ describe('html', () => {
     
             <div></div>
         `);
-
-        const styleCount = document.querySelectorAll('style').length;
 
         const root1 = document.createElement('div');
         const [element1] = view();

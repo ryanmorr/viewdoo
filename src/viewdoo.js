@@ -37,14 +37,16 @@ function parseView(source) {
     let script, style;
     const html = source
         .replace(STYLE_RE, (all, css) => (style = css.trim()) && '')
-        .replace(SCRIPT_RE, (all, js) => (script = js.trim()) && '');
+        .replace(SCRIPT_RE, (all, js) => (script = js.trim()) && '')
+        .trim()
+        .replace(NEW_LINES_RE, '\\n');
     return [style, new Function(`
         with (this) {
             ${script}
             return function() {
                 let _strings = [], _sequence = [], _values = [];
                 _sequence.push('${
-                    html.trim().replace(NEW_LINES_RE, '\\n').replace(TEMPLATE_RE, (all, code) => {
+                    html.replace(TEMPLATE_RE, (all, code) => {
                         if (code.startsWith('each')) {
                             let loop = EACH_RE.exec(code);
                             if (loop) {
@@ -80,13 +82,13 @@ function parseView(source) {
 export default function viewdoo(source) {
     let cssAttr;
     const [css, tpl] = parseView(source);
+    if (css && !cssAttr) {
+        cssAttr = CSS_ATTR_PREFIX + uniqueID();
+        createStyleSheet(css, cssAttr);
+    }
     return (props = {}) => {
         let elements, marker;
         const update = () => {
-            if (css && !cssAttr) {
-                cssAttr = CSS_ATTR_PREFIX + uniqueID();
-                createStyleSheet(css, cssAttr);
-            }
             const [strings, values] = render();
             const html = strings.reduce((acc, str, i) => acc + (values[i - 1]) + str);
             const frag = parseHTML(html);
