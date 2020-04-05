@@ -370,6 +370,7 @@ describe('html', () => {
 
         expect(state).to.have.property('foo', 1);
         expect(state).to.have.property('bar', 2);
+        expect(state).to.not.have.property('baz');
     });
 
     it('should automatically update a view when a state variable changes', () => {
