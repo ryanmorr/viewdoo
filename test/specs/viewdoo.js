@@ -102,7 +102,7 @@ describe('html', () => {
         `);
     });
 
-    it('should return a state object that automatically updates the view when changing properties', () => {
+    it('should return a state object that automatically updates the view when changing properties', (done) => {
         const view = viewdoo(`
             <div class="{{foo}}">{{bar}}</div>
         `);
@@ -120,25 +120,31 @@ describe('html', () => {
 
         state.foo = 'xyz';
 
-        expectHTML(root, `
-            <div class="xyz">123</div>
-        `);
+        requestAnimationFrame(() => {
+            expectHTML(root, `
+                <div class="xyz">123</div>
+            `);
 
-        state.bar = 789;
+            state.bar = 789;
 
-        expectHTML(root, `
-            <div class="xyz">789</div>
-        `);
+            requestAnimationFrame(() => {
+                expectHTML(root, `
+                    <div class="xyz">789</div>
+                `);
+
+                done();
+            });
+        });
     });
 
-    it('should update a view with multiple root elements', () => {
+    it('should update a view with multiple root elements', (done) => {
         const view = viewdoo(`
             <div>{{foo}}</div>
             <span>{{bar}}</span>
             <section>{{baz}}</section>
         `);
 
-        const [element] = view({
+        const [element, state] = view({
             foo: 5,
             bar: 15,
             baz: 30
@@ -151,9 +157,23 @@ describe('html', () => {
             <span>15</span>
             <section>30</section>
         `);
+
+        state.foo = 'foo';
+        state.bar = 'bar';
+        state.baz = 'baz';
+
+        requestAnimationFrame(() => {
+            expectHTML(root, `
+                <div>foo</div>
+                <span>bar</span>
+                <section>baz</section>
+            `);
+
+            done();
+        });
     });
 
-    it('should support expressions', () => {
+    it('should support expressions', (done) => {
         const view = viewdoo(`
             <div>{{foo + bar}}</div>
         `);
@@ -171,18 +191,24 @@ describe('html', () => {
 
         state.foo = 100;
 
-        expectHTML(root, `
-            <div>120</div>
-        `);
+        requestAnimationFrame(() => {
+            expectHTML(root, `
+                <div>120</div>
+            `);
 
-        state.bar = 200;
+            state.bar = 200;
 
-        expectHTML(root, `
-            <div>300</div>
-        `);
+            requestAnimationFrame(() => {
+                expectHTML(root, `
+                    <div>300</div>
+                `);
+
+                done();
+            });
+        });  
     });
 
-    it('should support loops', () => {
+    it('should support loops', (done) => {
         const view = viewdoo(`
             <ul>
                 {{each items as item, i}}
@@ -208,18 +234,22 @@ describe('html', () => {
 
         state.items = [10, 20, 30, 40, 50];
 
-        expectHTML(root, `
-            <ul>
-                <li>0: 10</li>
-                <li>1: 20</li>
-                <li>2: 30</li>
-                <li>3: 40</li>
-                <li>4: 50</li>
-            </ul>
-        `);
+        requestAnimationFrame(() => {
+            expectHTML(root, `
+                <ul>
+                    <li>0: 10</li>
+                    <li>1: 20</li>
+                    <li>2: 30</li>
+                    <li>3: 40</li>
+                    <li>4: 50</li>
+                </ul>
+            `);
+
+            done();
+        });
     });
 
-    it('should support conditionals', () => {
+    it('should support conditionals', (done) => {
         const view = viewdoo(`
             {{if foo === 1}}
                 <div>a</div>
@@ -242,15 +272,21 @@ describe('html', () => {
 
         state.foo = 2;
 
-        expectHTML(root, `
-            <div>b</div>
-        `);
+        requestAnimationFrame(() => {
+            expectHTML(root, `
+                <div>b</div>
+            `);
 
-        state.foo = 3;
+            state.foo = 3;
 
-        expectHTML(root, `
-            <div>c</div>
-        `);
+            requestAnimationFrame(() => {
+                expectHTML(root, `
+                    <div>c</div>
+                `);
+
+                done();
+            });
+        });
     });
 
     it('should support scoped styles', () => {
@@ -289,7 +325,7 @@ describe('html', () => {
         expect(window.getComputedStyle(neutralDOM.querySelector('em')).getPropertyValue('padding')).to.equal('0px');
     });
 
-    it('should maintain scoped styles after updates', () => {
+    it('should maintain scoped styles after updates', (done) => {
         const view = viewdoo(`
             <style>
                 .foo {
@@ -329,15 +365,20 @@ describe('html', () => {
         expect(window.getComputedStyle(neutralDOM.querySelector('em')).getPropertyValue('padding')).to.equal('0px');
 
         state.count++;
-        viewEm = root.querySelector('em');
-        expectHTML(viewEm, '1');
-        expect(window.getComputedStyle(root.querySelector('div')).getPropertyValue('padding')).to.equal('8px');
-        expect(window.getComputedStyle(root.querySelector('span')).getPropertyValue('padding')).to.equal('11px');
-        expect(window.getComputedStyle(viewEm).getPropertyValue('padding')).to.equal('2px');
 
-        expect(window.getComputedStyle(neutralDOM.querySelector('div')).getPropertyValue('padding')).to.equal('0px');
-        expect(window.getComputedStyle(neutralDOM.querySelector('span')).getPropertyValue('padding')).to.equal('0px');
-        expect(window.getComputedStyle(neutralDOM.querySelector('em')).getPropertyValue('padding')).to.equal('0px');
+        requestAnimationFrame(() => {
+            viewEm = root.querySelector('em');
+            expectHTML(viewEm, '1');
+            expect(window.getComputedStyle(root.querySelector('div')).getPropertyValue('padding')).to.equal('8px');
+            expect(window.getComputedStyle(root.querySelector('span')).getPropertyValue('padding')).to.equal('11px');
+            expect(window.getComputedStyle(viewEm).getPropertyValue('padding')).to.equal('2px');
+
+            expect(window.getComputedStyle(neutralDOM.querySelector('div')).getPropertyValue('padding')).to.equal('0px');
+            expect(window.getComputedStyle(neutralDOM.querySelector('span')).getPropertyValue('padding')).to.equal('0px');
+            expect(window.getComputedStyle(neutralDOM.querySelector('em')).getPropertyValue('padding')).to.equal('0px');    
+
+            done();
+        });
     });
 
     it('should create one stylesheet per view', () => {
@@ -378,7 +419,7 @@ describe('html', () => {
     it('should render a view with script variables', () => {
         const view = viewdoo(`
             <script>
-                const baz = 3;
+                const foo = 1, bar = 2, baz = 3;
             </script>
 
             <div class="container">
@@ -386,10 +427,7 @@ describe('html', () => {
             </div>
         `);
 
-        const [element, state] = view({
-            foo: 1,
-            bar: 2
-        });
+        const [element, state] = view();
 
         root.appendChild(element);
 
@@ -399,12 +437,12 @@ describe('html', () => {
             </div>
         `);
 
-        expect(state).to.have.property('foo', 1);
-        expect(state).to.have.property('bar', 2);
+        expect(state).to.not.have.property('foo');
+        expect(state).to.not.have.property('bar');
         expect(state).to.not.have.property('baz');
     });
 
-    it('should automatically update a view when a state variable changes', () => {
+    it('should automatically update a view when a state variable changes', (done) => {
         const view = viewdoo(`
             <script>
                 increment = () => count++;
@@ -424,12 +462,20 @@ describe('html', () => {
         expect(state).to.have.property('count', 0);
 
         state.increment();
-        expectHTML(root, '<div>1</div>');
         expect(state).to.have.property('count', 1);
 
-        state.increment();
-        expectHTML(root, '<div>2</div>');
-        expect(state).to.have.property('count', 2);
+        requestAnimationFrame(() => {
+            expectHTML(root, '<div>1</div>');
+
+            state.increment();
+            expect(state).to.have.property('count', 2);
+
+            requestAnimationFrame(() => {
+                expectHTML(root, '<div>2</div>');
+
+                done();
+            });
+        });
     });
 
     it('should support async updates', (done) => {
@@ -458,7 +504,7 @@ describe('html', () => {
         }, 200);
     });
 
-    it('should support multiple instances of the same view', () => {
+    it('should support multiple instances of the same view', (done) => {
         const view = viewdoo(`
             <style>
                 div {
@@ -510,37 +556,48 @@ describe('html', () => {
         expect(window.getComputedStyle(view3Div).getPropertyValue('padding')).to.equal('4px');
 
         state1.increment();
-        expect(state1).to.have.property('count', 4);
-        view1Div = root1.querySelector('div');
-        expectHTML(view1Div, '4');
-        expect(window.getComputedStyle(view1Div).getPropertyValue('padding')).to.equal('4px');
-        expect(state2).to.have.property('count', 7);
-        expectHTML(root2.querySelector('div'), '7');
-        expect(state3).to.have.property('count', 20);
-        expectHTML(root3.querySelector('div'), '20');
 
-        state2.increment();
-        expect(state1).to.have.property('count', 4);
-        expectHTML(root1.querySelector('div'), '4');
-        expect(state2).to.have.property('count', 8);
-        view2Div = root2.querySelector('div');
-        expectHTML(view2Div, '8');
-        expect(window.getComputedStyle(view2Div).getPropertyValue('padding')).to.equal('4px');
-        expect(state3).to.have.property('count', 20);
-        expectHTML(root3.querySelector('div'), '20');
+        requestAnimationFrame(() => {
+            expect(state1).to.have.property('count', 4);
+            view1Div = root1.querySelector('div');
+            expectHTML(view1Div, '4');
+            expect(window.getComputedStyle(view1Div).getPropertyValue('padding')).to.equal('4px');
+            expect(state2).to.have.property('count', 7);
+            expectHTML(root2.querySelector('div'), '7');
+            expect(state3).to.have.property('count', 20);
+            expectHTML(root3.querySelector('div'), '20');
 
-        state3.increment();
-        expect(state1).to.have.property('count', 4);
-        expectHTML(root1.querySelector('div'), '4');
-        expect(state2).to.have.property('count', 8);
-        expectHTML(root2.querySelector('div'), '8');
-        expect(state3).to.have.property('count', 21);
-        view3Div = root3.querySelector('div');
-        expectHTML(view3Div, '21');
-        expect(window.getComputedStyle(view3Div).getPropertyValue('padding')).to.equal('4px');
+            state2.increment();
 
-        document.body.removeChild(root1);
-        document.body.removeChild(root2);
-        document.body.removeChild(root3);
+            requestAnimationFrame(() => {
+                expect(state1).to.have.property('count', 4);
+                expectHTML(root1.querySelector('div'), '4');
+                expect(state2).to.have.property('count', 8);
+                view2Div = root2.querySelector('div');
+                expectHTML(view2Div, '8');
+                expect(window.getComputedStyle(view2Div).getPropertyValue('padding')).to.equal('4px');
+                expect(state3).to.have.property('count', 20);
+                expectHTML(root3.querySelector('div'), '20');
+
+                state3.increment();
+
+                requestAnimationFrame(() => {
+                    expect(state1).to.have.property('count', 4);
+                    expectHTML(root1.querySelector('div'), '4');
+                    expect(state2).to.have.property('count', 8);
+                    expectHTML(root2.querySelector('div'), '8');
+                    expect(state3).to.have.property('count', 21);
+                    view3Div = root3.querySelector('div');
+                    expectHTML(view3Div, '21');
+                    expect(window.getComputedStyle(view3Div).getPropertyValue('padding')).to.equal('4px');
+
+                    document.body.removeChild(root1);
+                    document.body.removeChild(root2);
+                    document.body.removeChild(root3);
+
+                    done();
+                });
+            });
+        });
     });
 });

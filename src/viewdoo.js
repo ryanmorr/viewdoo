@@ -1,4 +1,5 @@
 import csscope from '@ryanmorr/csscope';
+import { scheduleRender } from '@ryanmorr/schedule-render';
 
 const STYLE_RE = /<style>([\s\S]*?)<\/style>/;
 const SCRIPT_RE = /<script>([\s\S]*?)<\/script>/;
@@ -87,7 +88,7 @@ export default function viewdoo(source) {
         createStyleSheet(css, cssAttr);
     }
     return (props = {}) => {
-        let elements, marker;
+        let elements, marker, rendering = false;
         const update = () => {
             const [strings, values] = render();
             const html = strings.reduce((acc, str, i) => acc + (values[i - 1]) + str);
@@ -113,8 +114,12 @@ export default function viewdoo(source) {
             set(obj, prop, nextVal) {
                 const prevVal = obj[prop];
                 obj[prop] = nextVal;
-                if (render && (nextVal !== prevVal || (nextVal && typeof nextVal === 'object'))) {
-                    update();
+                if (render && !rendering && (nextVal !== prevVal || (nextVal && typeof nextVal === 'object'))) {
+                    rendering = true;
+                    scheduleRender(() => {
+                        update();
+                        rendering = false;
+                    });
                 }
                 return true;
             }
