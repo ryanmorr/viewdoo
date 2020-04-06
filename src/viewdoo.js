@@ -10,14 +10,38 @@ const IF_RE = /^if (.*)$/;
 const ELSE_IF_RE = /^else if (.*)$/;
 const CSS_ATTR_PREFIX = 'viewdoo-';
 
-function uniqueID() {
+const eventMap = {};
+
+function uuid() {
     return Math.random().toString(36).substr(2, 9);
 }
 
-function parseHTML(html) {
+function normalize(val) {
+    if (typeof val === 'function') {
+        const id = uuid();
+        eventMap[id] = val;
+        return id;
+    }
+    return val;
+}
+
+function parseHTML(strings, values) {
+    const html = strings.reduce((acc, str, i) => acc + normalize(values[i - 1]) + str);
     const template = document.createElement('template');
     template.innerHTML = html;
-    return document.importNode(template.content, true);
+    const frag = document.importNode(template.content, true);
+    Array.from(frag.querySelectorAll('*')).forEach((el) => {
+        const attrs = el.attributes;
+        for(let i = 0; i < attrs.length; i++) {
+            const name = attrs[i].name;
+            const value = attrs[i].value;
+            if (name.startsWith('on') && value in eventMap) {
+                el.removeAttribute(name);
+                el.addEventListener(name.slice(2).toLowerCase(), eventMap[value]);
+            }
+        }
+    });
+    return frag;
 }
 
 function createStyleSheet(css, attr) {
@@ -84,15 +108,14 @@ export default function viewdoo(source) {
     let cssAttr;
     const [css, tpl] = parseView(source);
     if (css && !cssAttr) {
-        cssAttr = CSS_ATTR_PREFIX + uniqueID();
+        cssAttr = CSS_ATTR_PREFIX + uuid();
         createStyleSheet(css, cssAttr);
     }
     return (props = {}) => {
         let elements, marker, rendering = false;
         const update = () => {
             const [strings, values] = render();
-            const html = strings.reduce((acc, str, i) => acc + (values[i - 1]) + str);
-            const frag = parseHTML(html);
+            const frag = parseHTML(strings, values);
             if (cssAttr) {
                 addStyleAttribute(frag, cssAttr);
             }

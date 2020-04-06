@@ -336,7 +336,63 @@ describe('html', () => {
                 done();
             });
         });
+    }); 
+
+
+
+
+
+
+
+
+
+
+
+
+    it('should support event listeners', (done) => {
+        const view = viewdoo(`
+            <div onclick={{increment}}>{{count}}</div>
+        `);
+
+        const [element, state] = view({
+            count: 0,
+            increment: () => state.count++
+        });
+
+        root.appendChild(element);
+
+        expectHTML(root, `
+            <div>0</div>
+        `);
+
+        const div = root.querySelector('div');
+
+        const event = new MouseEvent('click', {
+            bubbles: true,
+            cancelable: true
+        });
+
+        div.addEventListener('click', (e) => {
+            expect(e).to.equal(event);
+
+            requestAnimationFrame(() => {
+                expectHTML(root, `
+                    <div>1</div>
+                `);
+
+                done();
+            });
+        });
+
+        div.dispatchEvent(event);
     });
+
+
+
+
+
+
+
 
     it('should support scoped styles', () => {
         const view = viewdoo(`
