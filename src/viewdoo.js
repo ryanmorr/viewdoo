@@ -16,19 +16,24 @@ function uuid() {
     return Math.random().toString(36).substr(2, 9);
 }
 
-function normalize(val) {
-    if (typeof val === 'function') {
-        const id = uuid();
-        eventMap[id] = val;
-        return id;
-    }
-    return val;
+function createStyleSheet(css, attr) {
+    const style = document.createElement('style');
+    style.setAttribute(attr, '');
+    style.innerHTML = csscope(attr, css);
+    document.head.appendChild(style);
 }
 
-function parseHTML(strings, values) {
-    const html = strings.reduce((acc, str, i) => acc + normalize(values[i - 1]) + str);
+function parseHTML(strings, values, cssAttr) {
     const template = document.createElement('template');
-    template.innerHTML = html;
+    template.innerHTML = strings.reduce((acc, str, i) => {
+        let val = values[i - 1];
+        if (typeof val === 'function') {
+            const id = uuid();
+            eventMap[id] = val;
+            val = id;
+        }
+        return acc + val + str;
+    });
     const frag = document.importNode(template.content, true);
     Array.from(frag.querySelectorAll('*')).forEach((el) => {
         const attrs = el.attributes;
@@ -40,22 +45,11 @@ function parseHTML(strings, values) {
                 el.addEventListener(name.slice(2).toLowerCase(), eventMap[value]);
             }
         }
+        if (cssAttr) {
+            el.setAttribute(cssAttr, '');
+        }
     });
     return frag;
-}
-
-function createStyleSheet(css, attr) {
-    const style = document.createElement('style');
-    style.setAttribute(attr, '');
-    style.innerHTML = csscope(attr, css);
-    document.head.appendChild(style);
-}
-
-function addStyleAttribute(element, attr) {
-    Array.from(element.children).forEach((child) => {
-        child.setAttribute(attr, '');
-        addStyleAttribute(child, attr);
-    });
 }
 
 function parseView(source) {
@@ -115,10 +109,7 @@ export default function viewdoo(source) {
         let elements, marker, rendering = false;
         const update = () => {
             const [strings, values] = render();
-            const frag = parseHTML(strings, values);
-            if (cssAttr) {
-                addStyleAttribute(frag, cssAttr);
-            }
+            const frag = parseHTML(strings, values, cssAttr);
             const nextElements = Array.from(frag.childNodes);
             if (!marker) {
                 marker = document.createTextNode('');

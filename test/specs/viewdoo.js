@@ -338,17 +338,6 @@ describe('html', () => {
         });
     }); 
 
-
-
-
-
-
-
-
-
-
-
-
     it('should support event listeners', (done) => {
         const view = viewdoo(`
             <div onclick={{increment}}>{{count}}</div>
@@ -386,13 +375,6 @@ describe('html', () => {
 
         div.dispatchEvent(event);
     });
-
-
-
-
-
-
-
 
     it('should support scoped styles', () => {
         const view = viewdoo(`
