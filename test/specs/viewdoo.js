@@ -173,6 +173,55 @@ describe('html', () => {
         });
     });
 
+    it('should update a view between sibling nodes', (done) => {
+        const view = viewdoo(`
+            <div>{{foo}}</div>
+            <span>{{bar}}</span>
+            <section>{{baz}}</section>
+        `);
+
+        const [element, state] = view({
+            foo: 5,
+            bar: 10,
+            baz: 15
+        });
+
+        const p = document.createElement('p');
+        const em = document.createElement('em');
+        const i = document.createElement('i');
+        const text = document.createTextNode('foo');
+
+        root.append(p, text, element, em, i);
+
+        expectHTML(root, `
+            <p></p>
+            foo
+            <div>5</div>
+            <span>10</span>
+            <section>15</section>
+            <em></em>
+            <i></i>
+        `);
+
+        state.foo = 'foo';
+        state.bar = 'bar';
+        state.baz = 'baz';
+
+        requestAnimationFrame(() => {
+            expectHTML(root, `
+                <p></p>
+                foo
+                <div>foo</div>
+                <span>bar</span>
+                <section>baz</section>
+                <em></em>
+                <i></i>
+            `);
+
+            done();
+        });
+    });
+
     it('should support expressions', (done) => {
         const view = viewdoo(`
             <div>{{foo + bar}}</div>
