@@ -687,4 +687,69 @@ describe('html', () => {
             });
         });
     });
+
+    it('should support defining state variables within the inner script', (done) => {
+        const view = viewdoo(`
+            <script>
+                set({count: 0, increment: null});
+
+                increment = () => count++;
+            </script>
+
+            <div>{{count}}</div>
+        `);
+
+        const [element, state] = view();
+
+        root.appendChild(element);
+
+        expectHTML(root, '<div>0</div>');
+        expect(state).to.have.property('count', 0);
+        expect(state).to.have.property('increment');
+
+        state.increment();
+        expect(state).to.have.property('count', 1);
+
+        requestAnimationFrame(() => {
+            expectHTML(root, '<div>1</div>');
+
+            state.increment();
+            expect(state).to.have.property('count', 2);
+
+            requestAnimationFrame(() => {
+                expectHTML(root, '<div>2</div>');
+
+                done();
+            });
+        });
+    });
+
+    it('should properly marge external state with internal state', (done) => {
+        const view = viewdoo(`
+            <script>
+                set({foo: 5, baz: 3});
+
+                setTimeout(() => set({foo: 10}), 100);
+            </script>
+
+            <div></div>
+        `);
+
+        const state = view({
+            foo: 1,
+            bar: 2
+        })[1];
+
+        expect(state).to.have.property('foo', 1);
+        expect(state).to.have.property('bar', 2);
+        expect(state).to.have.property('baz', 3);
+
+        setTimeout(() => {
+            expect(state).to.have.property('foo', 10);
+            expect(state).to.have.property('bar', 2);
+            expect(state).to.have.property('baz', 3);
+
+            done();
+        }, 200);
+    });
 });

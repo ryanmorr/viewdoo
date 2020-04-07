@@ -9,7 +9,7 @@ const EACH_RE = /^each (.*) as (.*)$/;
 const IF_RE = /^if (.*)$/;
 const ELSE_IF_RE = /^else if (.*)$/;
 const CSS_ATTR_PREFIX = 'viewdoo-';
-
+const EVENT_ID = Symbol('event-id');
 const eventMap = {};
 
 function uuid() {
@@ -28,8 +28,12 @@ function parseHTML(strings, values, cssAttr) {
     template.innerHTML = strings.reduce((acc, str, i) => {
         let val = values[i - 1];
         if (typeof val === 'function') {
-            const id = uuid();
-            eventMap[id] = val;
+            let id = val[EVENT_ID];
+            if (!id) {
+                id = uuid();
+                eventMap[id] = val;
+                val[EVENT_ID] = id;
+            }
             val = id;
         }
         return acc + val + str;
@@ -37,7 +41,7 @@ function parseHTML(strings, values, cssAttr) {
     const frag = document.importNode(template.content, true);
     Array.from(frag.querySelectorAll('*')).forEach((el) => {
         const attrs = el.attributes;
-        for(let i = 0; i < attrs.length; i++) {
+        for (let i = 0; i < attrs.length; i++) {
             const name = attrs[i].name;
             const value = attrs[i].value;
             if (name.startsWith('on') && value in eventMap) {
@@ -53,13 +57,17 @@ function parseHTML(strings, values, cssAttr) {
 }
 
 function parseView(source) {
-    let script, style;
+    let script, style, cssAttr;
     const html = source
         .replace(STYLE_RE, (all, css) => (style = css.trim()) && '')
         .replace(SCRIPT_RE, (all, js) => (script = js.trim()) && '')
         .trim()
         .replace(NEW_LINES_RE, '\\n');
-    return [style, new Function(`
+    if (style) {
+        cssAttr = CSS_ATTR_PREFIX + uuid();
+        createStyleSheet(style, cssAttr);
+    }
+    return [cssAttr, new Function('set', `
         with (this) {
             ${script}
             return function() {
@@ -99,14 +107,20 @@ function parseView(source) {
 }
 
 export default function viewdoo(source) {
-    let cssAttr;
-    const [css, tpl] = parseView(source);
-    if (css && !cssAttr) {
-        cssAttr = CSS_ATTR_PREFIX + uuid();
-        createStyleSheet(css, cssAttr);
-    }
+    const [cssAttr, tpl] = parseView(source);
     return (props = {}) => {
         let elements, marker, rendering = false;
+        const set = (data) => {
+            for (const key in data) {
+                if (key in state) {
+                    if (render) {
+                        state[key] = data[key];
+                    }
+                } else {
+                    state[key] = data[key];
+                }
+            }
+        };
         const update = () => {
             const [strings, values] = render();
             const frag = parseHTML(strings, values, cssAttr);
@@ -138,7 +152,7 @@ export default function viewdoo(source) {
                 return true;
             }
         });
-        const render = tpl.call(state);
+        const render = tpl.call(state, set);
         return [update(), state];
     };
 }
