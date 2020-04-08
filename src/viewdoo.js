@@ -9,8 +9,7 @@ const EACH_RE = /^each (.*) as (.*)$/;
 const IF_RE = /^if (.*)$/;
 const ELSE_IF_RE = /^else if (.*)$/;
 const CSS_ATTR_PREFIX = 'viewdoo-';
-const EVENT_ID = Symbol('event-id');
-const eventMap = {};
+const template = document.createElement('template');
 
 function uuid() {
     return Math.random().toString(36).substr(2, 9);
@@ -24,29 +23,25 @@ function createStyleSheet(css, attr) {
 }
 
 function parseHTML(strings, values, cssAttr) {
-    const template = document.createElement('template');
+    const events = {};
     template.innerHTML = strings.reduce((acc, str, i) => {
         let val = values[i - 1];
         if (typeof val === 'function') {
-            let id = val[EVENT_ID];
-            if (!id) {
-                id = uuid();
-                eventMap[id] = val;
-                val[EVENT_ID] = id;
-            }
+            let id = uuid();
+            events[id] = val;
             val = id;
         }
         return acc + val + str;
     });
     const frag = document.importNode(template.content, true);
-    Array.from(frag.querySelectorAll('*')).forEach((el) => {
+    frag.querySelectorAll('*').forEach((el) => {
         const attrs = el.attributes;
         for (let i = 0; i < attrs.length; i++) {
             const name = attrs[i].name;
             const value = attrs[i].value;
-            if (name.startsWith('on') && value in eventMap) {
+            if (name.startsWith('on') && value in events) {
                 el.removeAttribute(name);
-                el.addEventListener(name.slice(2).toLowerCase(), eventMap[value]);
+                el.addEventListener(name.slice(2).toLowerCase(), events[value]);
             }
         }
         if (cssAttr) {
