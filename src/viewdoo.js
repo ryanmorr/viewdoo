@@ -104,7 +104,7 @@ function parseView(source) {
 export default function viewdoo(source) {
     const [cssAttr, tpl] = parseView(source);
     return (props = {}) => {
-        let elements, marker, rendering = false;
+        let render, elements, marker, rendering = false;
         const set = (data) => {
             for (const key in data) {
                 if (key in state) {
@@ -127,11 +127,9 @@ export default function viewdoo(source) {
             if (elements) {
                 elements.forEach((node) => node.remove());
                 marker.parentNode.insertBefore(frag, marker);
-                elements = nextElements;
-            } else {
-                elements = nextElements;
-                return frag;
             }
+            elements = nextElements;
+            return frag;
         };
         const state = new Proxy(props, {
             set(obj, prop, nextVal) {
@@ -147,7 +145,7 @@ export default function viewdoo(source) {
                 return true;
             }
         });
-        const render = tpl.call(state, set);
+        render = tpl.call(state, set);
         return [update(), state];
     };
 }
