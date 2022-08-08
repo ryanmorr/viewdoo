@@ -41,6 +41,6 @@
   },
   "dependencies": {
     "@ryanmorr/csscope": "^0.1.0",
-    "@ryanmorr/schedule-render": "^2.0.1"
+    "@ryanmorr/schedule-render": "^3.0.1"
   }
 }
