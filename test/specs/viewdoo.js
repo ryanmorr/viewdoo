@@ -1,6 +1,6 @@
 import viewdoo from '../../src/viewdoo';
 
-describe('html', () => {
+describe('viewdoo', () => {
     const root = document.createElement('div');
     document.body.appendChild(root);
 
