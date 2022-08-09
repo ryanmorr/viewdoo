@@ -691,7 +691,8 @@ describe('viewdoo', () => {
     it('should support defining state variables within the inner script', (done) => {
         const view = viewdoo(`
             <script>
-                set({count: 0, increment: null});
+                this.count = 0;
+                this.increment = null;
 
                 increment = () => count++;
             </script>
@@ -722,34 +723,5 @@ describe('viewdoo', () => {
                 done();
             });
         });
-    });
-
-    it('should properly marge external state with internal state', (done) => {
-        const view = viewdoo(`
-            <script>
-                set({foo: 5, baz: 3});
-
-                setTimeout(() => set({foo: 10}), 100);
-            </script>
-
-            <div></div>
-        `);
-
-        const state = view({
-            foo: 1,
-            bar: 2
-        })[1];
-
-        expect(state).to.have.property('foo', 1);
-        expect(state).to.have.property('bar', 2);
-        expect(state).to.have.property('baz', 3);
-
-        setTimeout(() => {
-            expect(state).to.have.property('foo', 10);
-            expect(state).to.have.property('bar', 2);
-            expect(state).to.have.property('baz', 3);
-
-            done();
-        }, 200);
     });
 });

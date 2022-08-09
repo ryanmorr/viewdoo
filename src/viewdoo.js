@@ -1,5 +1,5 @@
 import csscope from '@ryanmorr/csscope';
-import { scheduleRender } from '@ryanmorr/schedule-render';
+import scheduleRender from '@ryanmorr/schedule-render';
 
 const STYLE_RE = /<style>([\s\S]*?)<\/style>/;
 const SCRIPT_RE = /<script>([\s\S]*?)<\/script>/;
@@ -62,7 +62,7 @@ function parseView(source) {
         cssAttr = CSS_ATTR_PREFIX + uuid();
         createStyleSheet(style, cssAttr);
     }
-    return [cssAttr, new Function('set', `
+    return [cssAttr, new Function(`
         with (this) {
             ${script}
             return function() {
@@ -105,17 +105,6 @@ export default function viewdoo(source) {
     const [cssAttr, tpl] = parseView(source);
     return (props = {}) => {
         let render, elements, marker, rendering = false;
-        const set = (data) => {
-            for (const key in data) {
-                if (key in state) {
-                    if (render) {
-                        state[key] = data[key];
-                    }
-                } else {
-                    state[key] = data[key];
-                }
-            }
-        };
         const update = () => {
             const [strings, values] = render();
             const frag = parseHTML(strings, values, cssAttr);
@@ -145,7 +134,7 @@ export default function viewdoo(source) {
                 return true;
             }
         });
-        render = tpl.call(state, set);
+        render = tpl.call(state);
         return [update(), state];
     };
 }
