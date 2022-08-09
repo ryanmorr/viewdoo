@@ -1,8 +1,8 @@
 # viewdoo
 
 [![Version Badge][version-image]][project-url]
-[![Build Status][build-image]][build-url]
 [![License][license-image]][license-url]
+[![Build Status][build-image]][build-url]
 
 > A crude Svelte-inspired UI library just because
 
@@ -16,9 +16,7 @@ npm install @ryanmorr/viewdoo
 
 ## Usage
 
-A viewdoo component features similar composition and functionality to a Svelte component; encapsulating scoped styles, reactive scripting, and HTML templating to form reusable, self-contained views.
-
-Define a component by providing the source as a string consisting of HTML markup with optional style and script tags. The script tag contains just regular JavaScript responsible for managing the state and behavior of a component instance in an isolated context. Any variables defined within the script are available to the template. The script is exposed to only one pre-defined function called `set` that can be used to define reactive state variables that will automatically trigger an update of the component when assigned a value. The source is compiled and returns a function for creating instances:
+A viewdoo component features similar composition and functionality to a Svelte component; encapsulating scoped styles, reactive scripting, and HTML templating to form reusable, self-contained views:
 
 ```javascript
 import viewdoo from '@ryanmorr/viewdoo';
@@ -32,7 +30,7 @@ const Counter = viewdoo(`
     </style>
 
     <script>
-        set({count: 0});
+        this.count = 0;
                 
         function increment() {
             count += 1;
@@ -46,48 +44,31 @@ const Counter = viewdoo(`
 `);
 ```
 
-Create an instance of a component with an optional initial state, the properties of which will also become reactive state variables within the inner script of the component. It returns an array with the rendered component inside a document fragment at the first index and an external state object at the second index. The properties of this external state object and the internal reactive state variables of the same name will always remain in sync with one another because they are in fact one and the same. This means that the state of a component instance can be accessed and manipulated both internally and externally, and automatically trigger an update when the state changes:
+Components are defined by providing the source as a string consisting of HTML markup with optional style and script tags. The script tag contains just regular JavaScript responsible for managing the state and behavior of a component instance in an isolated context. Any variables defined within the script are available to the template:
 
 ```javascript
-// Create an instance of the counter and override the initial count value
-const [fragment, state] = Counter({
-    count: 10
-});
+const HelloWorld = viewdoo(`
+    <script>
+        const message = 'World';
+    </script>
 
-// Mount the component to the DOM
-document.body.appendChild(fragment);
-
-// Change the state and trigger an update
-state.count = 20;
+    <h1>Hello {{message}}</h1>
+`);
 ```
 
-Styles are automatically scoped to the component, supporting all CSS selectors and at-rules, including keyframes and media queries:
+A state variable can be defined by assigning properties to `this` within the script. These variables are reactive by nature, meaning they will automatically trigger an update of the component when the value is changed:
 
 ```javascript
-const Component = viewdoo(`
-    <style>
-        .foo {
-            background-color: red;
-            animation-name: slide-in 1s ease-in;
-        }
+const Clock = viewdoo(`
+    <script>
+        this.time = getTime();
 
-        @keyframes slide-in {
-            from {
-                transform: translateX(0%);
-            }
-            to {
-                transform: translateX(100%);
-            }
-        }
+        const getTime = () => new Date().toLocaleTimeString();
+        
+        setInterval(() => (time = getTime()), 1000);
+    </script>
 
-        @media screen and (max-width: 600px) {
-            .foo {
-                background-color: blue;
-            }
-        }
-    </style>
-
-    <div class="foo"></div>
+    <div>Time: {{time}}</div>
 `);
 ```
 
@@ -119,13 +100,50 @@ const Users = viewdoo(`
 `);
 ```
 
+Including a style tag allows you to declare CSS styles that are automatically scoped to the component, supporting all CSS selectors and media queries:
+
+```javascript
+const Foo = viewdoo(`
+    <style>
+        .foo {
+            background-color: red;
+        }
+
+        @media screen and (max-width: 600px) {
+            .foo {
+                background-color: blue;
+            }
+        }
+    </style>
+
+    <div class="foo"></div>
+`);
+```
+
+The source string of the component is compiled and returns a constructor function for creating instances. You can than create instances of the component with an optional initial state, the properties of which will become reactive state variables within the inner script of the component. It returns an array with the rendered component inside a document fragment at the first index and an external state object at the second index. The properties of this external state object and the internal reactive state variables of the same name will always remain in sync with one another because they are in fact one and the same:
+
+```javascript
+// Create an instance of a component
+const [fragment, state] = Component({
+    foo: 1,
+    bar: 2,
+    baz: 3
+});
+
+// Mount the component instance to the DOM
+document.body.appendChild(fragment);
+
+// Changing the component instance state externally will trigger an update
+state.foo = 20;
+```
+
 ## License
 
 This project is dedicated to the public domain as described by the [Unlicense](http://unlicense.org/).
 
 [project-url]: https://github.com/ryanmorr/viewdoo
-[version-image]: https://badge.fury.io/gh/ryanmorr%2Fviewdoo.svg
-[build-url]: https://travis-ci.org/ryanmorr/viewdoo
-[build-image]: https://travis-ci.org/ryanmorr/viewdoo.svg
-[license-image]: https://img.shields.io/badge/license-Unlicense-blue.svg
+[version-image]: https://img.shields.io/github/package-json/v/ryanmorr/viewdoo?color=blue&style=flat-square
+[build-url]: https://travis-ci.com/github/ryanmorr/viewdoo
+[build-image]: https://img.shields.io/travis/com/ryanmorr/viewdoo?style=flat-square
+[license-image]: https://img.shields.io/github/license/ryanmorr/viewdoo?color=blue&style=flat-square
 [license-url]: UNLICENSE
