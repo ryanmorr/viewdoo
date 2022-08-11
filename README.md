@@ -6,6 +6,8 @@
 
 > A crude Svelte-inspired UI library just because
 
+This project is a proof of concept, built on the principles of another project of mine called [voodoo](https://github.com/ryanmorr/voodoo). Combined with the functionality of [stache](https://github.com/ryanmorr/stache) and [csscope](https://github.com/ryanmorr/csscope) to create a basic implementation that mimics the core features of Svelte.production.
+
 ## Install
 
 Download the [CJS](https://github.com/ryanmorr/viewdoo/raw/master/dist/viewdoo.cjs.js), [ESM](https://github.com/ryanmorr/viewdoo/raw/master/dist/viewdoo.esm.js), [UMD](https://github.com/ryanmorr/viewdoo/raw/master/dist/viewdoo.umd.js) versions or install via NPM:
@@ -13,8 +15,6 @@ Download the [CJS](https://github.com/ryanmorr/viewdoo/raw/master/dist/viewdoo.c
 ```sh
 npm install @ryanmorr/viewdoo
 ```
-
-This project is a proof of concept, built on the principles of another project of mine called [voodoo](https://github.com/ryanmorr/voodoo). Combined with the functionality of [stache](https://github.com/ryanmorr/stache) and [csscope](https://github.com/ryanmorr/csscope) to create a basic implementation that mimics the core features of Svelte.production.
 
 ## Usage
 
