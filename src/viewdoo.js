@@ -33,7 +33,7 @@ function parseHTML(strings, values, cssAttr) {
         }
         return acc + val + str;
     });
-    const frag = document.importNode(template.content, true);
+    const frag = template.content;
     frag.querySelectorAll('*').forEach((el) => {
         const attrs = el.attributes;
         for (let i = 0; i < attrs.length; i++) {
