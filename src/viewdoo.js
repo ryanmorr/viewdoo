@@ -12,7 +12,7 @@ const CSS_ATTR_PREFIX = 'viewdoo-';
 const template = document.createElement('template');
 
 function uuid() {
-    return Math.random().toString(36).substr(2, 9);
+    return Math.random().toString(36).substring(2, 9);
 }
 
 function createStyleSheet(css, attr) {
