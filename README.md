@@ -61,9 +61,9 @@ A state variable can be defined by assigning properties to `this` within the scr
 ```javascript
 const Clock = viewdoo(`
     <script>
-        this.time = getTime();
-
         const getTime = () => new Date().toLocaleTimeString();
+
+        this.time = getTime();
         
         setInterval(() => (time = getTime()), 1000);
     </script>
