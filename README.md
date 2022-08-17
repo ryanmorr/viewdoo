@@ -79,15 +79,13 @@ The HTML structure is formulated using mustache-style templating that supports s
 ```javascript
 const Users = viewdoo(`
     <script>
-        set({
-            users: [
-                {name: 'Joe', isLoggedIn: true},
-                {name: 'John', isLoggedIn: false},
-                {name: 'Jane', isLoggedIn: true},
-                {name: 'Jim', isLoggedIn: true},
-                {name: 'Jen', isLoggedIn: false}
-            ]
-        });
+        this.users = [
+            {name: 'Joe', isLoggedIn: true},
+            {name: 'John', isLoggedIn: false},
+            {name: 'Jane', isLoggedIn: true},
+            {name: 'Jim', isLoggedIn: true},
+            {name: 'Jen', isLoggedIn: false}
+        ];
     </script>
 
     <ul>
