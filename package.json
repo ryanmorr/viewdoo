@@ -1,7 +1,7 @@
 {
   "name": "@ryanmorr/viewdoo",
   "description": "A crude Svelte-inspired UI library just because",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "license": "Unlicense",
   "author": "Ryan Morr",
   "homepage": "https://github.com/ryanmorr/viewdoo",
