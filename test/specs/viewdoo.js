@@ -25,6 +25,10 @@ describe('viewdoo', () => {
         return null;
     }
 
+    function waitForRender() {
+        return new Promise((resolve) => requestAnimationFrame(resolve));
+    }
+
     beforeEach(() => {
         neutralDOM.innerHTML = `
             <div class="foo">
@@ -102,7 +106,7 @@ describe('viewdoo', () => {
         `);
     });
 
-    it('should return a state object that automatically updates the view when changing properties', (done) => {
+    it('should return a state object that automatically updates the view when changing properties', async () => {
         const view = viewdoo(`
             <div class="{{foo}}">{{bar}}</div>
         `);
@@ -120,24 +124,22 @@ describe('viewdoo', () => {
 
         state.foo = 'xyz';
 
-        requestAnimationFrame(() => {
-            expectHTML(root, `
-                <div class="xyz">123</div>
-            `);
+        await waitForRender();
 
-            state.bar = 789;
+        expectHTML(root, `
+            <div class="xyz">123</div>
+        `);
 
-            requestAnimationFrame(() => {
-                expectHTML(root, `
-                    <div class="xyz">789</div>
-                `);
+        state.bar = 789;
 
-                done();
-            });
-        });
+        await waitForRender();
+
+        expectHTML(root, `
+            <div class="xyz">789</div>
+        `);
     });
 
-    it('should update a view with multiple root elements', (done) => {
+    it('should update a view with multiple root elements', async () => {
         const view = viewdoo(`
             <div>{{foo}}</div>
             <span>{{bar}}</span>
@@ -162,18 +164,16 @@ describe('viewdoo', () => {
         state.bar = 'bar';
         state.baz = 'baz';
 
-        requestAnimationFrame(() => {
-            expectHTML(root, `
-                <div>foo</div>
-                <span>bar</span>
-                <section>baz</section>
-            `);
+        await waitForRender();
 
-            done();
-        });
+        expectHTML(root, `
+            <div>foo</div>
+            <span>bar</span>
+            <section>baz</section>
+        `);
     });
 
-    it('should update a view between sibling nodes', (done) => {
+    it('should update a view between sibling nodes', async () => {
         const view = viewdoo(`
             <div>{{foo}}</div>
             <span>{{bar}}</span>
@@ -207,22 +207,20 @@ describe('viewdoo', () => {
         state.bar = 'bar';
         state.baz = 'baz';
 
-        requestAnimationFrame(() => {
-            expectHTML(root, `
-                <p></p>
-                foo
-                <div>foo</div>
-                <span>bar</span>
-                <section>baz</section>
-                <em></em>
-                <i></i>
-            `);
+        await waitForRender();
 
-            done();
-        });
+        expectHTML(root, `
+            <p></p>
+            foo
+            <div>foo</div>
+            <span>bar</span>
+            <section>baz</section>
+            <em></em>
+            <i></i>
+        `);
     });
 
-    it('should support expressions', (done) => {
+    it('should support expressions', async () => {
         const view = viewdoo(`
             <div>{{foo + bar}}</div>
         `);
@@ -240,24 +238,22 @@ describe('viewdoo', () => {
 
         state.foo = 100;
 
-        requestAnimationFrame(() => {
-            expectHTML(root, `
-                <div>120</div>
-            `);
+        await waitForRender();
 
-            state.bar = 200;
+        expectHTML(root, `
+            <div>120</div>
+        `);
 
-            requestAnimationFrame(() => {
-                expectHTML(root, `
-                    <div>300</div>
-                `);
+        state.bar = 200;
 
-                done();
-            });
-        });  
+        await waitForRender();
+
+        expectHTML(root, `
+            <div>300</div>
+        `);
     });
 
-    it('should support loops', (done) => {
+    it('should support loops', async () => {
         const view = viewdoo(`
             <ul>
                 {{each items as item, i}}
@@ -283,22 +279,20 @@ describe('viewdoo', () => {
 
         state.items = [10, 20, 30, 40, 50];
 
-        requestAnimationFrame(() => {
-            expectHTML(root, `
-                <ul>
-                    <li>0: 10</li>
-                    <li>1: 20</li>
-                    <li>2: 30</li>
-                    <li>3: 40</li>
-                    <li>4: 50</li>
-                </ul>
-            `);
+        await waitForRender();
 
-            done();
-        });
+        expectHTML(root, `
+            <ul>
+                <li>0: 10</li>
+                <li>1: 20</li>
+                <li>2: 30</li>
+                <li>3: 40</li>
+                <li>4: 50</li>
+            </ul>
+        `);
     });
 
-    it('should support conditionals', (done) => {
+    it('should support conditionals', async () => {
         const view = viewdoo(`
             {{if foo === 1}}
                 <div>a</div>
@@ -321,21 +315,19 @@ describe('viewdoo', () => {
 
         state.foo = 2;
 
-        requestAnimationFrame(() => {
-            expectHTML(root, `
-                <div>b</div>
-            `);
+        await waitForRender();
 
-            state.foo = 3;
+        expectHTML(root, `
+            <div>b</div>
+        `);
 
-            requestAnimationFrame(() => {
-                expectHTML(root, `
-                    <div>c</div>
-                `);
+        state.foo = 3;
 
-                done();
-            });
-        });
+        await waitForRender();
+
+        expectHTML(root, `
+            <div>c</div>
+        `);
     }); 
 
     it('should support event listeners', (done) => {
@@ -361,16 +353,16 @@ describe('viewdoo', () => {
             cancelable: true
         });
 
-        div.addEventListener('click', (e) => {
+        div.addEventListener('click', async (e) => {
             expect(e).to.equal(event);
 
-            requestAnimationFrame(() => {
-                expectHTML(root, `
-                    <div>1</div>
-                `);
+            await waitForRender();
 
-                done();
-            });
+            expectHTML(root, `
+                <div>1</div>
+            `);
+
+            done();
         });
 
         div.dispatchEvent(event);
@@ -412,7 +404,7 @@ describe('viewdoo', () => {
         expect(window.getComputedStyle(neutralDOM.querySelector('em')).getPropertyValue('padding')).to.equal('0px');
     });
 
-    it('should maintain scoped styles after updates', (done) => {
+    it('should maintain scoped styles after updates', async () => {
         const view = viewdoo(`
             <style>
                 .foo {
@@ -453,19 +445,17 @@ describe('viewdoo', () => {
 
         state.count++;
 
-        requestAnimationFrame(() => {
-            viewEm = root.querySelector('em');
-            expectHTML(viewEm, '1');
-            expect(window.getComputedStyle(root.querySelector('div')).getPropertyValue('padding')).to.equal('8px');
-            expect(window.getComputedStyle(root.querySelector('span')).getPropertyValue('padding')).to.equal('11px');
-            expect(window.getComputedStyle(viewEm).getPropertyValue('padding')).to.equal('2px');
+        await waitForRender();
 
-            expect(window.getComputedStyle(neutralDOM.querySelector('div')).getPropertyValue('padding')).to.equal('0px');
-            expect(window.getComputedStyle(neutralDOM.querySelector('span')).getPropertyValue('padding')).to.equal('0px');
-            expect(window.getComputedStyle(neutralDOM.querySelector('em')).getPropertyValue('padding')).to.equal('0px');    
+        viewEm = root.querySelector('em');
+        expectHTML(viewEm, '1');
+        expect(window.getComputedStyle(root.querySelector('div')).getPropertyValue('padding')).to.equal('8px');
+        expect(window.getComputedStyle(root.querySelector('span')).getPropertyValue('padding')).to.equal('11px');
+        expect(window.getComputedStyle(viewEm).getPropertyValue('padding')).to.equal('2px');
 
-            done();
-        });
+        expect(window.getComputedStyle(neutralDOM.querySelector('div')).getPropertyValue('padding')).to.equal('0px');
+        expect(window.getComputedStyle(neutralDOM.querySelector('span')).getPropertyValue('padding')).to.equal('0px');
+        expect(window.getComputedStyle(neutralDOM.querySelector('em')).getPropertyValue('padding')).to.equal('0px');    
     });
 
     it('should create one stylesheet per view', () => {
@@ -529,7 +519,7 @@ describe('viewdoo', () => {
         expect(state).to.not.have.property('baz');
     });
 
-    it('should automatically update a view when a state variable changes', (done) => {
+    it('should automatically update a view when a state variable changes', async () => {
         const view = viewdoo(`
             <script>
                 increment = () => count++;
@@ -551,18 +541,16 @@ describe('viewdoo', () => {
         state.increment();
         expect(state).to.have.property('count', 1);
 
-        requestAnimationFrame(() => {
-            expectHTML(root, '<div>1</div>');
+        await waitForRender();
 
-            state.increment();
-            expect(state).to.have.property('count', 2);
+        expectHTML(root, '<div>1</div>');
 
-            requestAnimationFrame(() => {
-                expectHTML(root, '<div>2</div>');
+        state.increment();
+        expect(state).to.have.property('count', 2);
 
-                done();
-            });
-        });
+        await waitForRender();
+
+        expectHTML(root, '<div>2</div>');
     });
 
     it('should support async updates', (done) => {
@@ -591,7 +579,7 @@ describe('viewdoo', () => {
         }, 200);
     });
 
-    it('should support multiple instances of the same view', (done) => {
+    it('should support multiple instances of the same view', async () => {
         const view = viewdoo(`
             <style>
                 div {
@@ -644,51 +632,49 @@ describe('viewdoo', () => {
 
         state1.increment();
 
-        requestAnimationFrame(() => {
-            expect(state1).to.have.property('count', 4);
-            view1Div = root1.querySelector('div');
-            expectHTML(view1Div, '4');
-            expect(window.getComputedStyle(view1Div).getPropertyValue('padding')).to.equal('4px');
-            expect(state2).to.have.property('count', 7);
-            expectHTML(root2.querySelector('div'), '7');
-            expect(state3).to.have.property('count', 20);
-            expectHTML(root3.querySelector('div'), '20');
+        await waitForRender();
 
-            state2.increment();
+        expect(state1).to.have.property('count', 4);
+        view1Div = root1.querySelector('div');
+        expectHTML(view1Div, '4');
+        expect(window.getComputedStyle(view1Div).getPropertyValue('padding')).to.equal('4px');
+        expect(state2).to.have.property('count', 7);
+        expectHTML(root2.querySelector('div'), '7');
+        expect(state3).to.have.property('count', 20);
+        expectHTML(root3.querySelector('div'), '20');
 
-            requestAnimationFrame(() => {
-                expect(state1).to.have.property('count', 4);
-                expectHTML(root1.querySelector('div'), '4');
-                expect(state2).to.have.property('count', 8);
-                view2Div = root2.querySelector('div');
-                expectHTML(view2Div, '8');
-                expect(window.getComputedStyle(view2Div).getPropertyValue('padding')).to.equal('4px');
-                expect(state3).to.have.property('count', 20);
-                expectHTML(root3.querySelector('div'), '20');
+        state2.increment();
 
-                state3.increment();
+        await waitForRender();
 
-                requestAnimationFrame(() => {
-                    expect(state1).to.have.property('count', 4);
-                    expectHTML(root1.querySelector('div'), '4');
-                    expect(state2).to.have.property('count', 8);
-                    expectHTML(root2.querySelector('div'), '8');
-                    expect(state3).to.have.property('count', 21);
-                    view3Div = root3.querySelector('div');
-                    expectHTML(view3Div, '21');
-                    expect(window.getComputedStyle(view3Div).getPropertyValue('padding')).to.equal('4px');
+        expect(state1).to.have.property('count', 4);
+        expectHTML(root1.querySelector('div'), '4');
+        expect(state2).to.have.property('count', 8);
+        view2Div = root2.querySelector('div');
+        expectHTML(view2Div, '8');
+        expect(window.getComputedStyle(view2Div).getPropertyValue('padding')).to.equal('4px');
+        expect(state3).to.have.property('count', 20);
+        expectHTML(root3.querySelector('div'), '20');
 
-                    document.body.removeChild(root1);
-                    document.body.removeChild(root2);
-                    document.body.removeChild(root3);
+        state3.increment();
 
-                    done();
-                });
-            });
-        });
+        await waitForRender();
+
+        expect(state1).to.have.property('count', 4);
+        expectHTML(root1.querySelector('div'), '4');
+        expect(state2).to.have.property('count', 8);
+        expectHTML(root2.querySelector('div'), '8');
+        expect(state3).to.have.property('count', 21);
+        view3Div = root3.querySelector('div');
+        expectHTML(view3Div, '21');
+        expect(window.getComputedStyle(view3Div).getPropertyValue('padding')).to.equal('4px');
+
+        document.body.removeChild(root1);
+        document.body.removeChild(root2);
+        document.body.removeChild(root3);
     });
 
-    it('should support defining state variables within the inner script', (done) => {
+    it('should support defining state variables within the inner script', async () => {
         const view = viewdoo(`
             <script>
                 this.count = 0;
@@ -711,17 +697,15 @@ describe('viewdoo', () => {
         state.increment();
         expect(state).to.have.property('count', 1);
 
-        requestAnimationFrame(() => {
-            expectHTML(root, '<div>1</div>');
+        await waitForRender();
 
-            state.increment();
-            expect(state).to.have.property('count', 2);
+        expectHTML(root, '<div>1</div>');
 
-            requestAnimationFrame(() => {
-                expectHTML(root, '<div>2</div>');
+        state.increment();
+        expect(state).to.have.property('count', 2);
 
-                done();
-            });
-        });
+        await waitForRender();
+
+        expectHTML(root, '<div>2</div>');
     });
 });
