@@ -6,11 +6,13 @@
 
 > A crude Svelte-inspired UI library just because
 
+## Description
+
 This project is a proof of concept, built on the principles of another project of mine called [voodoo](https://github.com/ryanmorr/voodoo). Combined with the functionality of [stache](https://github.com/ryanmorr/stache) and [csscope](https://github.com/ryanmorr/csscope) to create a basic implementation that mimics the core features of Svelte.
 
 ## Install
 
-Download the [CJS](https://github.com/ryanmorr/viewdoo/raw/master/dist/viewdoo.cjs.js), [ESM](https://github.com/ryanmorr/viewdoo/raw/master/dist/viewdoo.esm.js), [UMD](https://github.com/ryanmorr/viewdoo/raw/master/dist/viewdoo.umd.js) versions or install via NPM:
+Download the [CJS](https://github.com/ryanmorr/viewdoo/raw/master/dist/cjs/viewdoo.js), [ESM](https://github.com/ryanmorr/viewdoo/raw/master/dist/esm/viewdoo.js), [UMD](https://github.com/ryanmorr/viewdoo/raw/master/dist/umd/viewdoo.js) versions or install via NPM:
 
 ```sh
 npm install @ryanmorr/viewdoo
@@ -143,7 +145,7 @@ This project is dedicated to the public domain as described by the [Unlicense](h
 
 [project-url]: https://github.com/ryanmorr/viewdoo
 [version-image]: https://img.shields.io/github/package-json/v/ryanmorr/viewdoo?color=blue&style=flat-square
-[build-url]: https://travis-ci.com/github/ryanmorr/viewdoo
-[build-image]: https://img.shields.io/travis/com/ryanmorr/viewdoo?style=flat-square
+[build-url]: https://github.com/ryanmorr/viewdoo/actions
+[build-image]: https://img.shields.io/github/actions/workflow/status/ryanmorr/viewdoo/node.js.yml?style=flat-square
 [license-image]: https://img.shields.io/github/license/ryanmorr/viewdoo?color=blue&style=flat-square
 [license-url]: UNLICENSE
