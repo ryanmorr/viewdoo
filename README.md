@@ -1,6 +1,6 @@
 # viewdoo
 
-[![Version Badge][version-image]][project-url]
+[![Experimental Badge][experimental-image]][project-url]
 [![License][license-image]][license-url]
 [![Build Status][build-image]][build-url]
 
@@ -8,23 +8,13 @@
 
 ## Description
 
-This project is a proof of concept, built on the principles of another project of mine called [voodoo](https://github.com/ryanmorr/voodoo). Combined with the functionality of [stache](https://github.com/ryanmorr/stache) and [csscope](https://github.com/ryanmorr/csscope) to create a basic implementation that mimics the core features of Svelte.
-
-## Install
-
-Download the [CJS](https://github.com/ryanmorr/viewdoo/raw/master/dist/cjs/viewdoo.js), [ESM](https://github.com/ryanmorr/viewdoo/raw/master/dist/esm/viewdoo.js), [UMD](https://github.com/ryanmorr/viewdoo/raw/master/dist/umd/viewdoo.js) versions or install via NPM:
-
-```sh
-npm install @ryanmorr/viewdoo
-```
+This is an experimental project (not recommended for production), built on the principles of another project of mine called [voodoo](https://github.com/ryanmorr/voodoo). Combined with the functionality of [stache](https://github.com/ryanmorr/stache) and [csscope](https://github.com/ryanmorr/csscope) to create a basic implementation that mimics the core features of Svelte.
 
 ## Usage
 
 A viewdoo component features similar composition and functionality to a Svelte component; encapsulating scoped styles, reactive scripting, and HTML templating to form reusable, self-contained views:
 
 ```javascript
-import viewdoo from '@ryanmorr/viewdoo';
-
 const Counter = viewdoo(`
     <style>
         .counter {
@@ -144,7 +134,7 @@ state.foo = 20;
 This project is dedicated to the public domain as described by the [Unlicense](http://unlicense.org/).
 
 [project-url]: https://github.com/ryanmorr/viewdoo
-[version-image]: https://img.shields.io/github/package-json/v/ryanmorr/viewdoo?color=blue&style=flat-square
+[experimental-image]: https://img.shields.io/badge/status-experimental-blue
 [build-url]: https://github.com/ryanmorr/viewdoo/actions
 [build-image]: https://img.shields.io/github/actions/workflow/status/ryanmorr/viewdoo/node.js.yml?style=flat-square
 [license-image]: https://img.shields.io/github/license/ryanmorr/viewdoo?color=blue&style=flat-square
