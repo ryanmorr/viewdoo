@@ -4,7 +4,7 @@
 [![License][license-image]][license-url]
 [![Build Status][build-image]][build-url]
 
-> A crude Svelte-inspired UI library just because
+> A crude Svelte-inspired experimental UI library
 
 ## Description
 
